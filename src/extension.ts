@@ -69,7 +69,6 @@ class BezierEditorPanel {
 		const thisEditorUri = this._textEditor.document.uri.toString();
 	
 		if (!currentActiveEditor || currentActiveEditor.document.uri.toString() !== thisEditorUri) {
-			console.log("Editor is no longer active, setting pending edit!");
 			this.pendingEdit = {
 				data: data,
 				range: this._textEditor.selection
@@ -78,7 +77,6 @@ class BezierEditorPanel {
 		}
 	
 		if (this._textEditor.document.isClosed) {
-			console.log("Editor is closed, setting pending edit!");
 			this.pendingEdit = {
 				data: data,
 				range: this._textEditor.selection
@@ -145,6 +143,9 @@ class BezierEditorPanel {
 				<title>Bezier Curve</title>
 			</head>
 			<body>
+				<div id="bezierValuesDisplay">
+					cubic-bezier(${x1}, ${y1}, ${x2}, ${y2})
+				</div>
 				<canvas id="bezierCanvas" width="700px" height="700px" style="background-color: #f5f5f5;"></canvas>
 				<script>
 					const vscode = acquireVsCodeApi();
@@ -228,14 +229,21 @@ class BezierEditorPanel {
 						}
 					
 						draw();
-					
+	
 						const bezierValues = {
 							cp1x: (cp1.x - padding) / (width - 2 * padding),
 							cp1y: 1 - (cp1.y - padding) / (height - 2 * padding),
 							cp2x: (cp2.x - padding) / (width - 2 * padding),
 							cp2y: 1 - (cp2.y - padding) / (height - 2 * padding)
 						};
-					
+						
+						// Update the Bezier values display
+						document.getElementById("bezierValuesDisplay").innerText = 
+							"cubic-bexier(" + bezierValues.cp1x.toFixed(4) + ", " +
+							bezierValues.cp1y.toFixed(4) + ", " +
+							bezierValues.cp2x.toFixed(4) + ", " +
+							bezierValues.cp2y.toFixed(4) + ")";
+
 						vscode.postMessage({
 							command: "updateBezier",
 							data: bezierValues
@@ -248,6 +256,11 @@ class BezierEditorPanel {
 			
 					draw();
 				</script>
+				<style>
+					#bezierValuesDisplay {
+						font-size: 1.5em;
+					}
+				</style>
 			</body>
 			</html>
 		`;
