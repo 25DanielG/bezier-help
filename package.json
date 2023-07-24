@@ -10,6 +10,10 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/25DanielG/bezier-help"
+  },
   "activationEvents": [
     "onCommand:bezier-help.editBezier"
   ],
