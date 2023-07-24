@@ -11,3 +11,7 @@
 #### Bezier Help: Edit Bezier Curve
 - ID: bezier-help.editBezier
 - Description: Opens an interactive webview tab displaying bezier curve information
+### Instructions
+- Highlight in any file a command " cubic-bezier(xx, xx, xx ,xx)
+- Open command palette and run the Edit Bezier Curve command
+- Have fun!
