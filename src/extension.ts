@@ -57,6 +57,9 @@ class BezierEditorPanel {
 				this.updateWebview();
 			}
 		}, null);
+		this._panel.onDidDispose(() => {
+			BezierEditorPanel.currentPanel = undefined;
+		}, null);		
     }
 
     private updateTextInEditor(data: any) {

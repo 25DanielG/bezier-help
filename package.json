@@ -3,7 +3,7 @@
   "publisher": "25DanielG",
   "displayName": "Bezier Help",
   "description": "An extension that helps developers create varied animation with an interactive gui displaying bezier graphs in CSS.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.75.0"
   },
