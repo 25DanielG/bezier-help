@@ -132,6 +132,10 @@ class BezierEditorPanel {
 
     private _getHtmlForWebview() {
 		const matched = this.bezierValue.match(/cubic-bezier\(([^)]+)\)/);
+		if (matched === null) {
+			console.log("An error occurred while obtaining webview HTML.");
+			return "An error occurred.";
+		}
 		const [x1, y1, x2, y2] = matched[1].split(",").map(num => parseFloat(num.trim()));
 
 		return `
@@ -146,7 +150,7 @@ class BezierEditorPanel {
 				<div id="bezierValuesDisplay">
 					cubic-bezier(${x1}, ${y1}, ${x2}, ${y2})
 				</div>
-				<canvas id="bezierCanvas" width="700px" height="700px" style="background-color: #f5f5f5;"></canvas>
+				<canvas id="bezierCanvas" width="650px" height="650px" style="background-color: #f5f5f5;"></canvas>
 				<script>
 					const vscode = acquireVsCodeApi();
 					
@@ -161,35 +165,102 @@ class BezierEditorPanel {
 					let cp1 = {x: padding + ${x1} * (width - 2 * padding), y: height - padding - ${y1} * (height - 2 * padding)};
 					let cp2 = {x: padding + ${x2} * (width - 2 * padding), y: height - padding - ${y2} * (height - 2 * padding)};
 			
+					let cubePos = 0;
+					let startTime;
+					
+					function getY(x, p0, p1, p2, p3) {
+						function B(t, p) {
+							return (1 - t) * (1 - t) * (1 - t) * p0[p] +
+								3 * (1 - t) * (1 - t) * t * p1[p] +
+								3 * (1 - t) * t * t * p2[p] +
+								t * t * t * p3[p];
+						}
+					
+						let low = 0, high = 1, epsilon = 0.001;
+					
+						while (low < high) {
+							const mid = (low + high) / 2;
+							const estimatedX = B(mid, "x");
+							if (Math.abs(x - estimatedX) < epsilon) {
+								return B(mid, "y");
+							} else if (estimatedX < x) {
+								low = mid;
+							} else {
+								high = mid;
+							}
+						}
+					
+						return B(high, "y");
+					}
+
+					function animate() {
+						if (!startTime) {
+							startTime = Date.now();
+						}
+					
+						const elapsed = (Date.now() - startTime) / 2000;
+						const linearProgress = elapsed % 2;
+					
+						let cubePos;
+						if(linearProgress <= 1) {
+							cubePos = linearProgress * (width - 2 * padding) + padding;
+						} else {
+							cubePos = (2 - linearProgress) * (width - 2 * padding) + padding;
+						}
+					
+						draw();
+					
+						const boundedProgress = (cubePos - padding) / (width - 2 * padding);
+						const bezierX = getX(boundedProgress, { x: padding, y: 0 }, cp1, cp2, { x: width - padding, y: 1 });
+						
+						ctx.fillStyle = "#00ff007f";
+						ctx.fillRect(bezierX - 5, height/2 + 145, 30, 30);
+					
+						ctx.fillStyle = "#8000807f";
+						ctx.fillRect(cubePos - 5, height/2 + 180, 30, 30);
+					
+						requestAnimationFrame(animate);
+					}
+					
+					function getX(t, start, cp1, cp2, end) {
+						const invT = 1 - t;
+						return invT * invT * invT * start.x +
+							   3 * invT * invT * t * cp1.x +
+							   3 * invT * t * t * cp2.x +
+							   t * t * t * end.x;
+					}
+
+					animate();
+					
 					function draw() {
 						ctx.clearRect(0, 0, width, height);
 						
-						ctx.strokeStyle = "#EEE";
+						ctx.strokeStyle = "#CCC";
 						ctx.lineWidth = 1;
 						for (let i = 0; i <= 10; i++) {
 							ctx.beginPath();
 							ctx.moveTo(padding + i * (width - 2 * padding) / 10, padding);
 							ctx.lineTo(padding + i * (width - 2 * padding) / 10, height - padding);
 							ctx.stroke();
-			
+					
 							ctx.beginPath();
 							ctx.moveTo(padding, padding + i * (height - 2 * padding) / 10);
 							ctx.lineTo(width - padding, padding + i * (height - 2 * padding) / 10);
 							ctx.stroke();
 						}
-			
+					
 						ctx.strokeStyle = "black";
 						ctx.lineWidth = 3;
 						ctx.beginPath();
 						ctx.moveTo(padding, height - padding);
 						ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, width - padding, padding);
 						ctx.stroke();
-			
+					
 						ctx.fillStyle = "red";
 						ctx.fillRect(cp1.x - 5, cp1.y - 5, 10, 10); 
 						ctx.fillStyle = "blue";
 						ctx.fillRect(cp2.x - 5, cp2.y - 5, 10, 10);
-					}
+					}									
 			
 					function mouseDownHandler(e) {
 						const rect = canvas.getBoundingClientRect();
@@ -237,9 +308,8 @@ class BezierEditorPanel {
 							cp2y: 1 - (cp2.y - padding) / (height - 2 * padding)
 						};
 						
-						// Update the Bezier values display
 						document.getElementById("bezierValuesDisplay").innerText = 
-							"cubic-bexier(" + bezierValues.cp1x.toFixed(4) + ", " +
+							"cubic-bezier(" + bezierValues.cp1x.toFixed(4) + ", " +
 							bezierValues.cp1y.toFixed(4) + ", " +
 							bezierValues.cp2x.toFixed(4) + ", " +
 							bezierValues.cp2y.toFixed(4) + ")";
@@ -259,6 +329,7 @@ class BezierEditorPanel {
 				<style>
 					#bezierValuesDisplay {
 						font-size: 1.5em;
+						user-select: none;
 					}
 				</style>
 			</body>
