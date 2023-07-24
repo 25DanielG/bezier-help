@@ -1,5 +1,6 @@
 {
   "name": "bezier-help",
+  "publisher": "25DanielG",
   "displayName": "Bezier Help",
   "description": "An extension that helps developers create varied animation with an interactive gui displaying bezier graphs in CSS.",
   "version": "0.0.1",
@@ -10,6 +11,17 @@
   "categories": [
     "Other"
   ],
+  "extensionKind": [
+		"ui",
+		"workspace"
+	],
+  "keywords": [
+		"bezier",
+		"curve",
+		"webview",
+		"interactive",
+    "css"
+	],
   "repository": {
     "type": "git",
     "url": "https://github.com/25DanielG/bezier-help"
@@ -22,7 +34,8 @@
     "commands": [
       {
         "command": "bezier-help.editBezier",
-        "title": "Edit Bezier Curve"
+        "title": "Edit Bezier Curve",
+        "category": "Bezier Help"
       }
     ]
   },
