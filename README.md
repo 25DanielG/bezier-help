@@ -1,4 +1,4 @@
-# Checkstyle Converter
+# Bezier Help
 ## A CSS extension that opens an interactive webview tab that visualizes and provides edit options to a bezier graph.
 ### Features
 - A webview tab when running the Edit Bezier Curve command
